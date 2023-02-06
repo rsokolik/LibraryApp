@@ -1,6 +1,8 @@
 package pl.sokolik.library.model;
 
-public class Library {
+import java.io.Serializable;
+
+public class Library implements Serializable {
     private static final int MAX_PUBLICATIONS = 2000;
     private int publicationsNumber;
     private Publication[] publication = new Publication[MAX_PUBLICATIONS];

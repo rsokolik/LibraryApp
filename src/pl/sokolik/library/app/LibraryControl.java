@@ -1,8 +1,12 @@
 package pl.sokolik.library.app;
 
+import pl.sokolik.library.Exception.DataExportException;
+import pl.sokolik.library.Exception.DataImportException;
 import pl.sokolik.library.Exception.NoSuchOptionException;
 import pl.sokolik.library.io.ConsolePrinter;
 import pl.sokolik.library.io.DataReader;
+import pl.sokolik.library.io.file.FileManager;
+import pl.sokolik.library.io.file.FileManagerBuilder;
 import pl.sokolik.library.model.Book;
 import pl.sokolik.library.model.Library;
 import pl.sokolik.library.model.Magazine;
@@ -12,9 +16,25 @@ import java.util.InputMismatchException;
 
 public class LibraryControl {
 
-    private Library library = new Library();
+    private Library library;
     private ConsolePrinter printer = new ConsolePrinter();
     private DataReader dataReader = new DataReader(printer);
+    private FileManager fileManager;
+
+    public LibraryControl() {
+        //tworzenie obiektów w konstruktorze
+        fileManager = new FileManagerBuilder(printer, dataReader).build();
+
+        //jeżeli nie uda się wczytać danych z pliku
+        try {
+            library = fileManager.importData();
+            printer.printLine("Poprawnie zaimportowano plik z danymi");
+        } catch (DataImportException e) {
+            printer.printLine(e.getMessage());
+            printer.printLine("Stworzono nowy plik z publikacjami");
+            library = new Library();
+        }
+    }
 
     public void controlLoop(){
         Option option; // opcja pobrana od usera
@@ -68,7 +88,14 @@ public class LibraryControl {
     }
 
     private void exit() {
-        printer.printLine("Koniec programu :)");
+        try {
+            fileManager.exportData(library); //przy zakończeniu programu automatycznie wykona się zapis danych do pliku
+            printer.printLine("Zapisano wprowadzone dane");
+        } catch (DataExportException e) {
+            printer.printLine(e.getMessage());
+        }
+
+        printer.printLine("Koniec programu :) \n Do zobaczenia !");
         dataReader.close();
     }
 
