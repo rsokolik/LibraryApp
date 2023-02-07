@@ -3,6 +3,8 @@ package pl.sokolik.library.model;
 import java.util.Objects;
 
 public class Book extends Publication {
+
+    public static final String TYPE = "Książka";
     private String author;
     private int pages;
     private String isbn;
@@ -36,6 +38,18 @@ public class Book extends Publication {
 
     public void setIsbn(String isbn) {
         this.isbn = isbn;
+    }
+
+    //przekształcanie obiektów na Stringa w postaci formatu CSV
+    @Override
+    public String toCsv() {
+        return (TYPE) + "; "
+                + getTitle() + "; "
+                + getPublisher() + "; "
+                + getYear() + "; "
+                + author + "; "
+                + pages + "; "
+                + isbn;
     }
 
     @Override

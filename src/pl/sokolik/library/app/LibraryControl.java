@@ -2,6 +2,7 @@ package pl.sokolik.library.app;
 
 import pl.sokolik.library.Exception.DataExportException;
 import pl.sokolik.library.Exception.DataImportException;
+import pl.sokolik.library.Exception.InvalidDataException;
 import pl.sokolik.library.Exception.NoSuchOptionException;
 import pl.sokolik.library.io.ConsolePrinter;
 import pl.sokolik.library.io.DataReader;
@@ -29,7 +30,7 @@ public class LibraryControl {
         try {
             library = fileManager.importData();
             printer.printLine("Poprawnie zaimportowano plik z danymi");
-        } catch (DataImportException e) {
+        } catch (DataImportException | InvalidDataException e) {
             printer.printLine(e.getMessage());
             printer.printLine("Stworzono nowy plik z publikacjami");
             library = new Library();
@@ -79,7 +80,7 @@ public class LibraryControl {
     private void addMagazines() {
         try {
             Magazine magazine = dataReader.readAndCreateMagazine();
-            library.addMagazine(magazine); // wywołanie addMagazine z klasy Library
+            library.addPublication(magazine); // wywołanie addMagazine z klasy Library
         } catch (InputMismatchException e) {
             printer.printLine("Nie udało się utworzyć magazynu. Błędne dane !");
         } catch (ArrayIndexOutOfBoundsException e) {
@@ -108,7 +109,7 @@ public class LibraryControl {
         //jeżeli ktoś poda błędne dane to blok try nie powinien się wykonać tylko od razu catch
         try {
             Book book = dataReader.readAndCreateBook();
-            library.addBook(book); // wywołanie addBook z klasy Book
+            library.addPublication(book); // wywołanie addBook z klasy Book
         } catch (InputMismatchException e) {
             printer.printLine("Nie udało się utworzyć książki. Błędne dane !");
         } catch (ArrayIndexOutOfBoundsException e) {

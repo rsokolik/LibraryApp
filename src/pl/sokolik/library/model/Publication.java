@@ -3,7 +3,7 @@ package pl.sokolik.library.model;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class Publication implements Serializable {
+public abstract class Publication implements Serializable {
     private int year;
     private String title;
     private String publisher;
@@ -37,6 +37,8 @@ public class Publication implements Serializable {
     public void setPublisher(String publisher) {
         this.publisher = publisher;
     }
+
+    public abstract String toCsv();
 
     @Override
     public String toString() {

@@ -19,10 +19,12 @@ public class FileManagerBuilder {
         FileType fileType = getFileType(); //typ ENUM
 
         switch (fileType){
-            case SERIAL -> {
+            case SERIAL:
                 return new SerializableFileManager();
-            }
-            default -> throw new NoSuchFileTypeException("Nieobsługiwany typ danych");
+            case CSV:
+                return new CsvFileManager();
+            default:
+                throw new NoSuchFileTypeException("Nieobsługiwany typ danych");
         }
     }
 
