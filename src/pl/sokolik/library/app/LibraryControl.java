@@ -18,9 +18,9 @@ import java.util.InputMismatchException;
 public class LibraryControl {
 
     private Library library;
-    private ConsolePrinter printer = new ConsolePrinter();
-    private DataReader dataReader = new DataReader(printer);
-    private FileManager fileManager;
+    private final ConsolePrinter printer = new ConsolePrinter();
+    private final DataReader dataReader = new DataReader(printer);
+    private final FileManager fileManager;
 
     public LibraryControl() {
         //tworzenie obiektów w konstruktorze
@@ -49,10 +49,13 @@ public class LibraryControl {
                 case ADD_MAGAZINE -> addMagazines();
                 case PRINT_BOOKS -> printBooks();
                 case PRINT_MAGAZINES -> printMagazines();
+                case DELETE_BOOK -> deleteBook();
+                case DELETE_MAGAZINE -> deleteMagazine();
                 default -> printer.printLine("Wybrałeś błędną opcję");
             }
         } while (option != Option.EXIT);
     }
+
 
     private Option getOption() {
         boolean optionOk = false;
@@ -88,6 +91,15 @@ public class LibraryControl {
         }
     }
 
+    private void deleteMagazine() {
+        try {
+            Magazine magazine = dataReader.readAndCreateMagazine(); //magazyn, który chcemy usunąć
+            library.removePublication(magazine);
+        } catch (InputMismatchException e) {
+            printer.printLine("Nie udało się usunąć magazynu, niepoprawne dane !");
+        }
+    }
+
     private void exit() {
         try {
             fileManager.exportData(library); //przy zakończeniu programu automatycznie wykona się zapis danych do pliku
@@ -117,6 +129,15 @@ public class LibraryControl {
         }
     }
 
+    private void deleteBook() {
+        try {
+            Book book = dataReader.readAndCreateBook();//książka którą chcemy usunąć
+            library.removePublication(book);
+        } catch (InputMismatchException e) {
+            printer.printLine("Nie udało się usunąć magazynu, niepoprawne dane !");
+        }
+    }
+
     private void printOptions() {
         printer.printLine("Wybierz opcję");
         for (Option value : Option.values()) {
@@ -129,7 +150,9 @@ public class LibraryControl {
         ADD_BOOK(1, "- Dodanie nowej książki"),
         ADD_MAGAZINE(2, "- Dodanie nowego magazynu"),
         PRINT_BOOKS(3, "- Wyświetl dostępne książki"),
-        PRINT_MAGAZINES(4, "- Wyświetl dostępne magazyny");
+        PRINT_MAGAZINES(4, "- Wyświetl dostępne magazyny"),
+        DELETE_BOOK(5,"Usuń książkę"),
+        DELETE_MAGAZINE(6,"Usuń magazyn");
 
         private final int value;
         private final String description;
