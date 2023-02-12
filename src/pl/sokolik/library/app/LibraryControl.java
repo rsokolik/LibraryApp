@@ -12,7 +12,9 @@ import pl.sokolik.library.model.Book;
 import pl.sokolik.library.model.Library;
 import pl.sokolik.library.model.Magazine;
 import pl.sokolik.library.model.Publication;
+import pl.sokolik.library.model.comparators.AlphabeticalComparator;
 
+import java.util.Arrays;
 import java.util.InputMismatchException;
 
 public class LibraryControl {
@@ -76,7 +78,7 @@ public class LibraryControl {
     }
 
     private void printMagazines() {
-        Publication[] publication = library.getPublication();
+        Publication[] publication = getSortedPubication();
         printer.printMagazines(publication);
     }
 
@@ -113,8 +115,14 @@ public class LibraryControl {
     }
 
     private void printBooks() {
-        Publication[] publication = library.getPublication();
+        Publication[] publication = getSortedPubication();
         printer.printBooks(publication);
+    }
+
+    private Publication[] getSortedPubication() {
+        Publication[] publication = library.getPublication();
+        Arrays.sort(publication, new AlphabeticalComparator());
+        return publication;
     }
 
     private void addBook() {
