@@ -1,6 +1,7 @@
 package pl.sokolik.library.io;
 
 import pl.sokolik.library.model.Book;
+import pl.sokolik.library.model.LibraryUser;
 import pl.sokolik.library.model.Magazine;
 
 import java.util.Scanner;
@@ -51,6 +52,17 @@ public class DataReader {
 
     public void close(){
         scanner.close();
+    }
+
+    public LibraryUser createLibraryUser() {
+        printer.printLine("Podaj imie");
+        String firstName = scanner.nextLine();
+        printer.printLine("Podaj nazwisko");
+        String lastName = scanner.nextLine();
+        printer.printLine("Podaj PESEL");
+        String pesel = scanner.nextLine();
+
+        return new LibraryUser(firstName, lastName, pesel);
     }
 
     public int getInt(){

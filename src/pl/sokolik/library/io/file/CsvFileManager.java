@@ -3,24 +3,31 @@ package pl.sokolik.library.io.file;
 import pl.sokolik.library.Exception.DataExportException;
 import pl.sokolik.library.Exception.DataImportException;
 import pl.sokolik.library.Exception.InvalidDataException;
-import pl.sokolik.library.model.Book;
-import pl.sokolik.library.model.Library;
-import pl.sokolik.library.model.Magazine;
-import pl.sokolik.library.model.Publication;
+import pl.sokolik.library.model.*;
 
 import java.io.*;
+import java.util.Collection;
 import java.util.Scanner;
 
 public class CsvFileManager implements FileManager {
 
     private static final String FILE_NAME = "Library.csv";
+    private static final String USERS_FILE_NAME = "Library_user.csv";
 
     //metoda odczytuje każdą linię tekstu z pliku, sprawdza obiekt i dodaje do odpowiedniej publikacji w bibliotece
     @Override
     public Library importData() {
         Library library = new Library();
+
+        importPublications(library);
+        importUsers(library);
+
+        return library;
+    }
+
+    private void importPublications(Library library) {
         try(
-                Scanner scanner = new Scanner(new File(FILE_NAME))
+                var scanner = new Scanner(new File(FILE_NAME))
         ){
             //nie wiadomo ile jest danych w pliku stąd wczytywanie do końca
             while(scanner.hasNextLine()){ //dopóki jest jakiś nowy wiersz do odczytu (hasNextLine)
@@ -31,7 +38,29 @@ public class CsvFileManager implements FileManager {
         } catch (FileNotFoundException e) {
             throw new DataImportException("Brak pliku " + FILE_NAME);
         }
-        return library;
+    }
+
+    private void importUsers(Library library) {
+        try(
+                var scanner = new Scanner(new File(USERS_FILE_NAME))
+        ){
+            while(scanner.hasNextLine()){
+                String line = scanner.nextLine();
+                LibraryUser libraryUser = createUserFromString(line);
+                library.addUser(libraryUser);
+            }
+        } catch (FileNotFoundException e) {
+            throw new DataImportException("Brak pliku " + USERS_FILE_NAME);
+        }
+    }
+
+    private LibraryUser createUserFromString(String csvText) {
+        String[] split = csvText.split(";");
+        String firstName = split[0];
+        String lastName = split[1];
+        String pesel = split[2];
+
+        return new LibraryUser(firstName, lastName, pesel);
     }
 
     //Książka;W pustyni i w puszczy;Greg;2010;Henryk Sienkiewicz;324;1234567890123
@@ -72,17 +101,31 @@ public class CsvFileManager implements FileManager {
 
     @Override
     public void exportData(Library library) {
-        Publication[] publications = library.getPublication();
+        exportPublications(library);
+        exportUsers(library);
+    }
+
+    private void exportPublications(Library library) {
+        Collection<Publication> publications = library.getPublications().values(); //values aby iterować po wartościach
+        exportToCsv(publications, FILE_NAME);
+    }
+
+    private void exportUsers(Library library) {
+        Collection<LibraryUser> users = library.getUsers().values(); //values aby iterować po wartościach
+        exportToCsv(users, USERS_FILE_NAME);
+    }
+    //kolekcja (collection) dostarczana jako parametr metody
+    private <T extends CsvConvertible> void exportToCsv(Collection<T> collection, String fileName) {
         try( //TRY WITH RESOURCES
-            FileWriter fileWriter = new FileWriter(FILE_NAME);
-            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)
+             var fileWriter = new FileWriter(fileName);
+             var bufferedWriter = new BufferedWriter(fileWriter)
         ){
-            for (Publication publication : publications) {
-                bufferedWriter.write(publication.toCsv()); //zamiana na Stringa
-                bufferedWriter.newLine(); //przejście do kolejnego wiersza
+            for (T element : collection) {
+                bufferedWriter.write(element.toCsv()); //toCsv zdefiniowana w interfejsie CsvConvertible
+                bufferedWriter.newLine();
             }
         } catch (IOException e){
-            throw new DataExportException("Błąd zapisu danych do pliku " + FILE_NAME);
+            throw new DataExportException("Błąd zapisu danych do pliku " + fileName);
         }
     }
 }

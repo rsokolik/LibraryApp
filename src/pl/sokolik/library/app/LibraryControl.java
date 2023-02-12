@@ -1,24 +1,18 @@
 package pl.sokolik.library.app;
 
-import pl.sokolik.library.Exception.DataExportException;
-import pl.sokolik.library.Exception.DataImportException;
-import pl.sokolik.library.Exception.InvalidDataException;
-import pl.sokolik.library.Exception.NoSuchOptionException;
+import pl.sokolik.library.Exception.*;
 import pl.sokolik.library.io.ConsolePrinter;
 import pl.sokolik.library.io.DataReader;
 import pl.sokolik.library.io.file.FileManager;
 import pl.sokolik.library.io.file.FileManagerBuilder;
 import pl.sokolik.library.model.Book;
 import pl.sokolik.library.model.Library;
+import pl.sokolik.library.model.LibraryUser;
 import pl.sokolik.library.model.Magazine;
-import pl.sokolik.library.model.Publication;
-import pl.sokolik.library.model.comparators.AlphabeticalComparator;
 
-import java.util.Arrays;
 import java.util.InputMismatchException;
 
 public class LibraryControl {
-
     private Library library;
     private final ConsolePrinter printer = new ConsolePrinter();
     private final DataReader dataReader = new DataReader(printer);
@@ -46,18 +40,19 @@ public class LibraryControl {
             printOptions();
             option = getOption(); //do obsługi wyjątków
             switch(option){
-                case EXIT -> exit();
                 case ADD_BOOK -> addBook();
                 case ADD_MAGAZINE -> addMagazines();
                 case PRINT_BOOKS -> printBooks();
                 case PRINT_MAGAZINES -> printMagazines();
                 case DELETE_BOOK -> deleteBook();
                 case DELETE_MAGAZINE -> deleteMagazine();
+                case ADD_USER -> addUser();
+                case PRINT_USER -> printUser();
+                case EXIT -> exit();
                 default -> printer.printLine("Wybrałeś błędną opcję");
             }
         } while (option != Option.EXIT);
     }
-
 
     private Option getOption() {
         boolean optionOk = false;
@@ -77,11 +72,6 @@ public class LibraryControl {
         return option;
     }
 
-    private void printMagazines() {
-        Publication[] publication = getSortedPubication();
-        printer.printMagazines(publication);
-    }
-
     private void addMagazines() {
         try {
             Magazine magazine = dataReader.readAndCreateMagazine();
@@ -93,6 +83,13 @@ public class LibraryControl {
         }
     }
 
+    private void printMagazines() {
+//        Publication[] publication = getSortedPubication(); //podejście tablicowe
+//        printer.printMagazines(publication);
+
+        printer.printMagazines(library.getPublications().values());
+    }
+
     private void deleteMagazine() {
         try {
             Magazine magazine = dataReader.readAndCreateMagazine(); //magazyn, który chcemy usunąć
@@ -100,29 +97,6 @@ public class LibraryControl {
         } catch (InputMismatchException e) {
             printer.printLine("Nie udało się usunąć magazynu, niepoprawne dane !");
         }
-    }
-
-    private void exit() {
-        try {
-            fileManager.exportData(library); //przy zakończeniu programu automatycznie wykona się zapis danych do pliku
-            printer.printLine("Zapisano wprowadzone dane");
-        } catch (DataExportException e) {
-            printer.printLine(e.getMessage());
-        }
-
-        printer.printLine("Koniec programu :) \n Do zobaczenia !");
-        dataReader.close();
-    }
-
-    private void printBooks() {
-        Publication[] publication = getSortedPubication();
-        printer.printBooks(publication);
-    }
-
-    private Publication[] getSortedPubication() {
-        Publication[] publication = library.getPublication();
-        Arrays.sort(publication, new AlphabeticalComparator());
-        return publication;
     }
 
     private void addBook() {
@@ -137,6 +111,13 @@ public class LibraryControl {
         }
     }
 
+    private void printBooks() {
+//        Publication[] publication = getSortedPubication(); //podejście tablicowe
+//        printer.printBooks(publication);
+
+        printer.printBooks(library.getPublications().values());
+    }
+
     private void deleteBook() {
         try {
             Book book = dataReader.readAndCreateBook();//książka którą chcemy usunąć
@@ -145,6 +126,38 @@ public class LibraryControl {
             printer.printLine("Nie udało się usunąć magazynu, niepoprawne dane !");
         }
     }
+
+    private void addUser() {
+        LibraryUser libraryUser = dataReader.createLibraryUser(); //wczytanie od usera
+        try {
+            library.addUser(libraryUser);
+        } catch (UserAlreadyExistsException e) {
+            printer.printLine(e.getMessage());
+        }
+    }
+
+    private void printUser() {
+        printer.printUsers(library.getUsers().values()); //pobieranie wartości z mapy
+    }
+
+    private void exit() {
+        try {
+            fileManager.exportData(library); //przy zakończeniu programu automatycznie wykona się zapis danych do pliku
+            printer.printLine("Zapisano wprowadzone dane");
+        } catch (DataExportException e) {
+            printer.printLine(e.getMessage());
+        }
+
+        printer.printLine("Koniec programu :) \n Do zobaczenia !");
+        dataReader.close();
+    }
+
+    // <<<<<<<<<<<podejście tablicowe>>>>>>>>>>>>>>>
+//    private Publication[] getSortedPubication() {
+//        Publication[] publication = library.getPublication();
+//        Arrays.sort(publication, new AlphabeticalComparator());
+//        return publication;
+//    }
 
     private void printOptions() {
         printer.printLine("Wybierz opcję");
@@ -160,7 +173,9 @@ public class LibraryControl {
         PRINT_BOOKS(3, "- Wyświetl dostępne książki"),
         PRINT_MAGAZINES(4, "- Wyświetl dostępne magazyny"),
         DELETE_BOOK(5,"Usuń książkę"),
-        DELETE_MAGAZINE(6,"Usuń magazyn");
+        DELETE_MAGAZINE(6,"Usuń magazyn"),
+        ADD_USER(7, "Dodaj czytelnika"),
+        PRINT_USER(8,"Wyświetl czytelnika");
 
         private final int value;
         private final String description;

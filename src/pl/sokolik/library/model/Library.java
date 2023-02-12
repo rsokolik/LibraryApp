@@ -1,9 +1,52 @@
 package pl.sokolik.library.model;
 
+import pl.sokolik.library.Exception.PublicationAlreadyExistsException;
+import pl.sokolik.library.Exception.UserAlreadyExistsException;
+
 import java.io.Serializable;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Library implements Serializable {
+    private Map<String, Publication> publications = new HashMap<>(); //przechowywane jakieś publikacje
+    private Map<String, LibraryUser> users = new HashMap<>(); //<PESEL_USERA, OBIEKT_REPREZENTUJĄCY_CZYTELNIKA>
+
+    public Map<String, Publication> getPublications() {
+        return publications;
+    }
+
+    public Map<String, LibraryUser> getUsers() {
+        return users;
+    }
+
+    public void addPublication(Publication publication) {
+        if (publications.containsKey(publication.getTitle())){ //szukanie duplikatu po tytule
+            throw new PublicationAlreadyExistsException("Taka książka już istnieje ! " + publication.getTitle());
+        }
+
+        publications.put(publication.getTitle(), publication); //wartością jest cały obiekt publication
+    }
+
+    public void addUser(LibraryUser user) {
+        if (users.containsKey(user.getPesel())){
+            throw new UserAlreadyExistsException("Taki user już istnieje " + user.getPesel());
+        }
+
+        users.put(user.getPesel(), user);
+    }
+
+    public boolean removePublication (Publication pub){
+        if (publications.containsValue(pub)) {
+            publications.remove(pub.getTitle());
+            return true;
+        } else {
+            return false;
+        }
+    }
+/*
+        <<<<<<<<<<<<<<<<<<WCZEŚNIEJSZE ROZWIĄZANIE PRZY POMOCY TABLIC>>>>>>>>>>>>>>>>
+
+
     private static final int INITIAL_CAPACITY = 1; //początkowy rozmiar
     private int publicationsNumber;
     private Publication[] publication = new Publication[INITIAL_CAPACITY];
@@ -28,7 +71,7 @@ public class Library implements Serializable {
         publicationsNumber++;
     }
 
-    public void removePublication (Publication pub){
+    public boolean removePublication (Publication pub){
         final int notFound = -1;
         int foundIndex = notFound;
         int i = 0; //zmienna pomocnicza do pętli
@@ -47,5 +90,8 @@ public class Library implements Serializable {
             publicationsNumber--;
             publication[publicationsNumber] = null; //wstawia null na koniec tablicy
         }
+
+        return found != notFound;
     }
+ */
 }
