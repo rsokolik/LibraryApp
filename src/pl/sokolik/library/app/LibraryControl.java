@@ -5,11 +5,9 @@ import pl.sokolik.library.io.ConsolePrinter;
 import pl.sokolik.library.io.DataReader;
 import pl.sokolik.library.io.file.FileManager;
 import pl.sokolik.library.io.file.FileManagerBuilder;
-import pl.sokolik.library.model.Book;
-import pl.sokolik.library.model.Library;
-import pl.sokolik.library.model.LibraryUser;
-import pl.sokolik.library.model.Magazine;
+import pl.sokolik.library.model.*;
 
+import java.util.Comparator;
 import java.util.InputMismatchException;
 
 public class LibraryControl {
@@ -48,8 +46,9 @@ public class LibraryControl {
                 case DELETE_MAGAZINE -> deleteMagazine();
                 case ADD_USER -> addUser();
                 case PRINT_USER -> printUser();
+                case FIND_PUBLICATION -> findBook();
                 case EXIT -> exit();
-                default -> printer.printLine("Wybrałeś błędną opcję");
+            default -> printer.printLine("Wybrałeś błędną opcję");
             }
         } while (option != Option.EXIT);
     }
@@ -72,6 +71,15 @@ public class LibraryControl {
         return option;
     }
 
+    private void findBook() {
+        printer.printLine("Podaj tytuł publikacji: ");
+        String foundTitle = dataReader.getString();
+        String notFoundMessage = "Brak publikacji o takim tytule";
+        library.findPublicationByTitle(foundTitle)
+                .map(Publication::toString)
+                .ifPresentOrElse(System.out::println, () -> System.out.println(notFoundMessage));
+    }
+
     private void addMagazines() {
         try {
             Magazine magazine = dataReader.readAndCreateMagazine();
@@ -87,7 +95,9 @@ public class LibraryControl {
 //        Publication[] publication = getSortedPubication(); //podejście tablicowe
 //        printer.printMagazines(publication);
 
-        printer.printMagazines(library.getPublications().values());
+        printer.printMagazines(library.getSortedPublications(
+                Comparator.comparing(Publication::getTitle, String.CASE_INSENSITIVE_ORDER)
+        ));
     }
 
     private void deleteMagazine() {
@@ -115,7 +125,9 @@ public class LibraryControl {
 //        Publication[] publication = getSortedPubication(); //podejście tablicowe
 //        printer.printBooks(publication);
 
-        printer.printBooks(library.getPublications().values());
+        printer.printBooks(library.getSortedPublications(
+                Comparator.comparing(Publication::getTitle, String.CASE_INSENSITIVE_ORDER)
+        ));
     }
 
     private void deleteBook() {
@@ -137,7 +149,10 @@ public class LibraryControl {
     }
 
     private void printUser() {
-        printer.printUsers(library.getUsers().values()); //pobieranie wartości z mapy
+        printer.printUsers(library.getSortedUsers(
+//                ((p1, p2) -> p1.getPesel().compareToIgnoreCase(p2.getLastName())));
+                Comparator.comparing(User::getLastName, String.CASE_INSENSITIVE_ORDER)));
+        //referencja do metody, wyciągany jest user LastName i porównywany
     }
 
     private void exit() {
@@ -175,7 +190,8 @@ public class LibraryControl {
         DELETE_BOOK(5,"Usuń książkę"),
         DELETE_MAGAZINE(6,"Usuń magazyn"),
         ADD_USER(7, "Dodaj czytelnika"),
-        PRINT_USER(8,"Wyświetl czytelnika");
+        PRINT_USER(8,"Wyświetl czytelnika"),
+        FIND_PUBLICATION(9, "Wyszukaj publikację");
 
         private final int value;
         private final String description;

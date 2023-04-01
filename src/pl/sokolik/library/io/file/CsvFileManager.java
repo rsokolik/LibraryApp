@@ -7,7 +7,6 @@ import pl.sokolik.library.model.*;
 
 import java.io.*;
 import java.util.Collection;
-import java.util.Scanner;
 
 public class CsvFileManager implements FileManager {
 
@@ -27,30 +26,46 @@ public class CsvFileManager implements FileManager {
 
     private void importPublications(Library library) {
         try(
-                var scanner = new Scanner(new File(FILE_NAME))
+//                var scanner = new Scanner(new File(FILE_NAME))
+                var bufferedReader = new BufferedReader(new FileReader(FILE_NAME))
         ){
             //nie wiadomo ile jest danych w pliku stąd wczytywanie do końca
-            while(scanner.hasNextLine()){ //dopóki jest jakiś nowy wiersz do odczytu (hasNextLine)
-                String line = scanner.nextLine(); //odczytaj nową linię
-                Publication publication = createObjectFromString(line);
-                library.addPublication(publication);
-            }
+//            while(scanner.hasNextLine()){ //dopóki jest jakiś nowy wiersz do odczytu (hasNextLine)
+//                String line = scanner.nextLine(); //odczytaj nową linię
+//                Publication publication = createObjectFromString(line);
+//                library.addPublication(publication);
+//            }
+
+            bufferedReader.lines() //zwraca strumień Stringów
+                    .map(this::createObjectFromString)
+                    .forEach(library::addPublication); //wywołanie na obiekcie library, nie klasie
+
         } catch (FileNotFoundException e) {
             throw new DataImportException("Brak pliku " + FILE_NAME);
+        } catch (IOException e) {
+            throw new DataImportException("Błąd odczytu pliku " + FILE_NAME);
         }
     }
 
     private void importUsers(Library library) {
         try(
-                var scanner = new Scanner(new File(USERS_FILE_NAME))
+//                var scanner = new Scanner(new File(USERS_FILE_NAME))
+                var bufferedReader = new BufferedReader(new FileReader(USERS_FILE_NAME))
         ){
-            while(scanner.hasNextLine()){
-                String line = scanner.nextLine();
-                LibraryUser libraryUser = createUserFromString(line);
-                library.addUser(libraryUser);
-            }
+//            while(scanner.hasNextLine()){
+//                String line = scanner.nextLine();
+//                LibraryUser libraryUser = createUserFromString(line);
+//                library.addUser(libraryUser);
+//            }
+
+            bufferedReader.lines() //zwraca strumień Stringów
+                    .map(this::createUserFromString)
+                    .forEach(library::addUser); //wywołanie na obiekcie library, nie klasie
+
         } catch (FileNotFoundException e) {
             throw new DataImportException("Brak pliku " + USERS_FILE_NAME);
+        } catch (IOException e) {
+            throw new DataImportException("Błąd odczytu pliku " + USERS_FILE_NAME);
         }
     }
 

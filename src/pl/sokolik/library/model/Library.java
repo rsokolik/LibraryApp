@@ -4,8 +4,7 @@ import pl.sokolik.library.Exception.PublicationAlreadyExistsException;
 import pl.sokolik.library.Exception.UserAlreadyExistsException;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Library implements Serializable {
     private Map<String, Publication> publications = new HashMap<>(); //przechowywane jakieś publikacje
@@ -15,8 +14,23 @@ public class Library implements Serializable {
         return publications;
     }
 
+    public Collection<Publication> getSortedPublications(Comparator<Publication> comparator){
+        List<Publication> list = new ArrayList<>(publications.values());//przekazanie do konstruktora listy
+        list.sort(comparator);
+        return list;
+    }
+
+    public Optional<Publication> findPublicationByTitle(String title){
+        return Optional.ofNullable(publications.get(title));
+    }
     public Map<String, LibraryUser> getUsers() {
         return users;
+    }
+
+    public Collection<LibraryUser> getSortedUsers(Comparator<LibraryUser> comparator){
+        List<LibraryUser> list = new ArrayList<>(users.values());//przekazanie do konstruktora listy
+        list.sort(comparator);
+        return list;
     }
 
     public void addPublication(Publication publication) {

@@ -12,31 +12,51 @@ public class ConsolePrinter {
     //w Library mamy getPublication, który robi kopię tablicy z samymmi obiektami, bez nulli
     //stąd nie trzeba się odwoływać do i'tego elementu w tablicy
     public void printBooks(Collection<Publication> publication){ //tab: Publication[] publication
-        int countBooks = 0; //licznik książek
+//        int countBooks = 0; //licznik książek
+//
+//        for (Publication publications : publication) {
+//            if (publications instanceof Book) { // jeżeli jest obiekt typu Book to: (czyli jeżeli znajdzie książke)
+//                printLine(publications.toString());
+//                countBooks++; // zwiększa licznik
+//            }
+//        }
+//
+//        if (countBooks == 0) {
+//            printLine("Brak książek w bibliotece");
+//        }
 
-        for (Publication publications : publication) {
-            if (publications instanceof Book) { // jeżeli jest obiekt typu Book to: (czyli jeżeli znajdzie książke)
-                printLine(publications.toString());
-                countBooks++; // zwiększa licznik
-            }
-        }
+        long count = publication.stream()
+                .filter(p -> p instanceof Book)
+                .map(Publication::toString)
+                .peek(this::printLine)
+                .count();
 
-        if (countBooks == 0) {
+        if (count == 0) {
             printLine("Brak książek w bibliotece");
         }
     }
 
     public void printMagazines(Collection<Publication> publication){ //tab: Publication[] publication
-        int countMagazines = 0;
+//        int countMagazines = 0;
+//
+//        for (Publication publications : publication) {
+//            if (publications instanceof Magazine){
+//                printLine(publications.toString());
+//                countMagazines++;
+//            }
+//        }
+//
+//        if (countMagazines == 0) {
+//            printLine("Brak magazynów w bibliotece");
+//        }
 
-        for (Publication publications : publication) {
-            if (publications instanceof Magazine){
-                printLine(publications.toString());
-                countMagazines++;
-            }
-        }
+        long count = publication.stream()
+                .filter(p -> p instanceof Magazine)
+                .map(Publication::toString)
+                .peek(this::printLine)
+                .count();
 
-        if (countMagazines == 0) {
+        if (count == 0) {
             printLine("Brak magazynów w bibliotece");
         }
     }
